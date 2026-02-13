@@ -78,8 +78,7 @@ const Profile: React.FC = () => {
                             <span className="material-symbols-outlined text-xs">verified</span>
                         </div>
                     </div>
-                    <h2 className="text-xl font-bold">{user.name}</h2>
-                    <p className="text-slate-500 dark:text-slate-400 text-sm mb-1 font-medium">NIS: {user.nis}</p>
+                    <h2 className="text-xl font-bold mb-2">{user.name}</h2>
                     <div className="inline-block px-3 py-1 bg-primary/10 text-primary text-xs font-bold rounded-full uppercase tracking-wider">
                         {user.class}
                     </div>
