@@ -237,6 +237,9 @@ const Journal: React.FC = () => {
             <span className="material-symbols-outlined text-sm">chevron_right</span>
           </button>
         </div>
+
+        {/* Placeholder for right side to balance */}
+        <div className="w-10"></div>
       </header>
 
       {/* Loading Overlay */}
@@ -376,7 +379,7 @@ const Journal: React.FC = () => {
       <section className="mt-6">
         <div className="flex items-center justify-between px-4 pb-2">
           <h3 className="text-lg font-bold">Target Sekolah</h3>
-          <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded font-bold">WAJIB</span>
+          <span className="text-xs bg-purple-100 text-purple-600 px-2 py-0.5 rounded font-bold">DIANJURKAN</span>
         </div>
         <div className="px-4 space-y-3">
           {/* Tilawah */}

@@ -137,10 +137,16 @@ async function fetchWithRetry(url: string, options: RequestInit = {}, retries = 
 // --- API FUNCTIONS ---
 
 export const loginUser = async (nis: string): Promise<Student | null> => {
+  // Hardcoded check for Teacher and specific Students (Bypass Google Sheets for critical users)
+  if (nis.toUpperCase() === 'TEACHER01') {
+    return { ...MOCK_USER, id: 'teacher', name: 'Pak Budi', class: 'Teacher', nis: 'TEACHER01', role: 'teacher' } as any;
+  }
+  if (nis === '12345678') {
+    return MOCK_USER;
+  }
+
   if (USE_MOCK_DATA) {
     await new Promise(resolve => setTimeout(resolve, 800));
-    if (nis === '12345678') return MOCK_USER;
-    if (nis === 'teacher') return { ...MOCK_USER, id: 'teacher', name: 'Pak Budi', class: 'Teacher' };
     return null;
   }
 
@@ -218,7 +224,30 @@ export const submitJournal = async (entry: JournalEntry): Promise<boolean> => {
     return true;
   } catch (error) {
     console.error("Submit journal failed", error);
-    alert("Gagal menyimpan data karena server sibuk. Silakan coba lagi sebentar lagi.");
+    // Don't alert here, let the UI handle it or just log it.
+    // alert("Gagal menyimpan data karena server sibuk. Silakan coba lagi sebentar lagi."); 
+    return false;
+  }
+};
+
+export const updateUserProfile = async (student: Student): Promise<boolean> => {
+  if (USE_MOCK_DATA) {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    // Update local storage simulation if needed
+    return true;
+  }
+
+  try {
+    await fetchWithRetry(GOOGLE_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'updateProfile', ...student }),
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8',
+      },
+    });
+    return true;
+  } catch (error) {
+    console.error("Update profile failed", error);
     return false;
   }
 };
@@ -268,9 +297,15 @@ export const getStudentHistory = async (studentId: string): Promise<JournalEntry
     }
     return history;
   }
-  return [];
+  try {
+    const response = await fetchWithRetry(`${GOOGLE_SCRIPT_URL}?action=getHistory&studentId=${studentId}`);
+    const result = await response.json();
+    return result.status === 'success' ? result.data : [];
+  } catch (error) {
+    console.error("Get student history failed", error);
+    return [];
+  }
 }
-
 
 export const getTeacherStats = async () => {
   if (USE_MOCK_DATA) {

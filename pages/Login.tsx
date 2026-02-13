@@ -22,8 +22,9 @@ const Login: React.FC = () => {
     if (user) {
       localStorage.setItem('currentUser', JSON.stringify(user));
 
-      // Redirect based on user role
-      if (user.class === 'Teacher') {
+      // Redirect based on user role (case-insensitive + support 'Guru')
+      const userClass = (user.class || '').toLowerCase();
+      if (userClass === 'teacher' || userClass === 'guru') {
         navigate('/teacher');
       } else {
         navigate('/goal-setup');
@@ -89,7 +90,7 @@ const Login: React.FC = () => {
                 type="text"
                 value={nis}
                 onChange={(e) => setNis(e.target.value)}
-                placeholder="contoh: 12345678 atau TEACHER01"
+                placeholder="Masukkan NIS kamu"
                 className="block w-full h-16 pl-12 pr-4 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-lg font-medium focus:ring-primary focus:border-primary placeholder:opacity-30 transition-all dark:text-white"
               />
             </div>
@@ -103,8 +104,8 @@ const Login: React.FC = () => {
           >
             {isLoading ? 'Memuat...' : (
               <>
-                Mulai Jurnal Saya
-                <span className="material-symbols-outlined font-bold">arrow_forward</span>
+                Masuk
+                <span className="material-symbols-outlined font-bold">login</span>
               </>
             )}
           </button>

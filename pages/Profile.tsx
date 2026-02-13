@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Student } from '../types';
 import { AVATARS, AvatarId } from '../config/avatars';
+import { updateUserProfile } from '../services/api';
 
 const Profile: React.FC = () => {
     const navigate = useNavigate();
@@ -27,24 +28,50 @@ const Profile: React.FC = () => {
         }
     };
 
-    const savePreferences = () => {
+    const savePreferences = async () => {
         if (!user) return;
-        const updatedUser = { ...user, startRamadhanDate: startDate };
-        localStorage.setItem('currentUser', JSON.stringify(updatedUser));
-        setUser(updatedUser);
-        alert('Pengaturan berhasil disimpan');
+
+        try {
+            const updatedUser = { ...user, startRamadhanDate: startDate };
+            const success = await updateUserProfile(updatedUser);
+
+            if (success) {
+                localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+                setUser(updatedUser);
+                alert('Pengaturan berhasil disimpan');
+            } else {
+                alert('Gagal menyimpan pengaturan. Periksa koneksi internet Anda.');
+            }
+        } catch (error) {
+            console.error('Save preferences error:', error);
+            alert('Terjadi kesalahan saat menyimpan pengaturan.');
+        }
     };
 
-    const handleAvatarChange = (avatarId: AvatarId) => {
+    const handleAvatarChange = async (avatarId: AvatarId) => {
         if (!user) return;
-        const updatedUser = {
-            ...user,
-            avatarId,
-            avatarUrl: AVATARS[avatarId]
-        };
-        localStorage.setItem('currentUser', JSON.stringify(updatedUser));
-        setUser(updatedUser);
-        setShowAvatarPicker(false);
+
+        try {
+            const updatedUser = {
+                ...user,
+                avatarId,
+                avatarUrl: AVATARS[avatarId]
+            };
+
+            const success = await updateUserProfile(updatedUser);
+
+            if (success) {
+                localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+                setUser(updatedUser);
+                setShowAvatarPicker(false);
+                alert('Avatar berhasil diperbarui!');
+            } else {
+                alert('Gagal memperbarui avatar. Silakan coba lagi.');
+            }
+        } catch (error) {
+            console.error('Avatar update error:', error);
+            alert('Terjadi kesalahan saat memperbarui avatar.');
+        }
     };
 
     if (!user) return null;
