@@ -319,9 +319,18 @@ export const getTeacherStats = async () => {
   try {
     const response = await fetchWithRetry(`${GOOGLE_SCRIPT_URL}?action=getTeacherStats`);
     const result = await response.json();
-    return result.status === 'success' ? result.data : null;
+    return result.status === 'success' ? result.data : {
+      avgCompletion: 0,
+      totalPoints: 0,
+      students: []
+    };
   } catch (error) {
-    return null;
+    console.warn("Fetch teacher stats failed, using empty data", error);
+    return {
+      avgCompletion: 0,
+      totalPoints: 0,
+      students: []
+    };
   }
 }
 

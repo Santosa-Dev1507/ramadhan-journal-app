@@ -5,6 +5,7 @@ import { Student, JournalEntry } from '../types';
 
 const TeacherDashboard: React.FC = () => {
     const [stats, setStats] = useState<any>(null);
+    const [user, setUser] = useState<Student | null>(null);
     const [selectedClass, setSelectedClass] = useState('all');
     const [sortBy, setSortBy] = useState<'name' | 'rank' | 'completion_asc'>('rank');
 
@@ -16,6 +17,10 @@ const TeacherDashboard: React.FC = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
+        const userStr = localStorage.getItem('currentUser');
+        if (userStr) {
+            setUser(JSON.parse(userStr));
+        }
         getTeacherStats().then(setStats);
     }, []);
 
@@ -192,8 +197,8 @@ const TeacherDashboard: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-2">
                     <div className="flex flex-col items-end mr-1">
-                        <span className="text-xs font-bold">Pak Budi</span>
-                        <span className="text-[10px] opacity-60">Guru PAI</span>
+                        <span className="text-xs font-bold">{user?.name || 'Guru'}</span>
+                        <span className="text-[10px] opacity-60">{user?.class || 'Pengajar'}</span>
                     </div>
                     <div className="size-9 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden border-2 border-primary/50">
                         <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDBsu4z5IVpiW4kDDlF7VYLG0DL7tV2ZhcQKrblcRV1NfkcuqFoReuyhG0K1emKefHAfexOZVzYnpfF9KeicpcJpKQJJS_tLr13Pz5N0OmZnt-wU0i7IVUtZJBluE4vGmu9QDr5LbJivDJhQAAsbIV7geo5ik58uF28RZXtBTUwM7tR3fmY6BLadVR0zH4zvi8I0mGT7jhWpOORzxwsHuV9jca8kf8i4TlNh34BBcnvm5AtImuC0pnDr6fg8TyCcua8DBXtou6nJKbC" alt="Profile" />
