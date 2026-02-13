@@ -15,21 +15,21 @@ const Login: React.FC = () => {
     setIsLoading(true);
     setError('');
 
-    // Shortcut for teacher dashboard demo
-    if (nis === 'teacher') {
-      setTimeout(() => navigate('/teacher'), 500);
-      return;
-    }
 
     const user = await loginUser(nis);
     setIsLoading(false);
 
     if (user) {
       localStorage.setItem('currentUser', JSON.stringify(user));
-      // First time user usually goes to goal setup, but for demo:
-      navigate('/goal-setup');
+
+      // Redirect based on user role
+      if (user.class === 'Teacher') {
+        navigate('/teacher');
+      } else {
+        navigate('/goal-setup');
+      }
     } else {
-      setError('NIS tidak ditemukan. Coba "12345678" atau "teacher"');
+      setError('NIS tidak ditemukan. Coba "12345678" atau "TEACHER01"');
     }
   };
 
@@ -87,10 +87,9 @@ const Login: React.FC = () => {
               <input
                 id="nis"
                 type="text"
-                inputMode="numeric"
                 value={nis}
                 onChange={(e) => setNis(e.target.value)}
-                placeholder="contoh: 12345678"
+                placeholder="contoh: 12345678 atau TEACHER01"
                 className="block w-full h-16 pl-12 pr-4 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-lg font-medium focus:ring-primary focus:border-primary placeholder:opacity-30 transition-all dark:text-white"
               />
             </div>
