@@ -70,8 +70,8 @@ const Leaderboard: React.FC = () => {
                             <button
                                 onClick={() => setTab('global')}
                                 className={`px-6 py-2 rounded-full font-semibold text-sm transition-all ${tab === 'global'
-                                        ? 'bg-primary text-white shadow-md'
-                                        : 'text-slate-500 dark:text-slate-400'
+                                    ? 'bg-primary text-white shadow-md'
+                                    : 'text-slate-500 dark:text-slate-400'
                                     }`}
                             >
                                 Global
@@ -79,8 +79,8 @@ const Leaderboard: React.FC = () => {
                             <button
                                 onClick={() => setTab('class')}
                                 className={`px-6 py-2 rounded-full font-semibold text-sm transition-all ${tab === 'class'
-                                        ? 'bg-primary text-white shadow-md'
-                                        : 'text-slate-500 dark:text-slate-400'
+                                    ? 'bg-primary text-white shadow-md'
+                                    : 'text-slate-500 dark:text-slate-400'
                                     }`}
                             >
                                 Kelas Saya
@@ -106,7 +106,7 @@ const Leaderboard: React.FC = () => {
                                     </div>
                                 </div>
                                 <div className="bg-white/60 dark:bg-slate-800/60 rounded-t-xl w-full pt-4 pb-2 text-center h-24 border-x border-t border-slate-200/30">
-                                    <p className="text-xs font-bold truncate px-2">{second.name.split(' ')[0]}</p>
+                                    <p className="text-xs font-bold truncate px-2">{second.name?.split(' ')[0] || second.name || 'Siswa'}</p>
                                     <p className="text-[10px] text-primary font-bold">{second.points.toLocaleString('id-ID')} pt</p>
                                 </div>
                             </div>
@@ -131,7 +131,7 @@ const Leaderboard: React.FC = () => {
                                     </div>
                                 </div>
                                 <div className="bg-primary/10 dark:bg-primary/20 backdrop-blur-sm rounded-t-2xl w-full pt-6 pb-3 text-center h-32 border-x border-t border-primary/30">
-                                    <p className="text-sm font-extrabold truncate px-2">{first.name.split(' ').slice(0, 2).join(' ')}</p>
+                                    <p className="text-sm font-extrabold truncate px-2">{first.name?.split(' ').slice(0, 2).join(' ') || first.name || 'Siswa'}</p>
                                     <p className="text-xs text-primary font-extrabold mt-1">{first.points.toLocaleString('id-ID')} pt</p>
                                 </div>
                             </div>
@@ -153,7 +153,7 @@ const Leaderboard: React.FC = () => {
                                     </div>
                                 </div>
                                 <div className="bg-white/60 dark:bg-slate-800/60 rounded-t-xl w-full pt-4 pb-2 text-center h-20 border-x border-t border-slate-200/30">
-                                    <p className="text-xs font-bold truncate px-2">{third.name.split(' ')[0]}</p>
+                                    <p className="text-xs font-bold truncate px-2">{third.name?.split(' ')[0] || third.name || 'Siswa'}</p>
                                     <p className="text-[10px] text-primary font-bold">{third.points.toLocaleString('id-ID')} pt</p>
                                 </div>
                             </div>
@@ -171,8 +171,8 @@ const Leaderboard: React.FC = () => {
                             <div
                                 key={student.id}
                                 className={`flex items-center gap-4 p-4 rounded-xl shadow-sm border transition-all ${isMe
-                                        ? 'bg-primary/10 border-primary ring-2 ring-primary/20'
-                                        : 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700'
+                                    ? 'bg-primary/10 border-primary ring-2 ring-primary/20'
+                                    : 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700'
                                     }`}
                             >
                                 <span className="w-6 text-center font-bold text-slate-400">{rank}</span>
