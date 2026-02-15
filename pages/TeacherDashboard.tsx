@@ -73,10 +73,11 @@ const TeacherDashboard: React.FC = () => {
 
     const studentsNeedingAttention = useMemo(() => {
         if (!stats) return [];
-        return stats.students.filter((s: Student) =>
+        // Use filteredStudents to respect the class filter
+        return filteredStudents.filter((s: Student) =>
             s.journalCompletion < 60 || (s.stats?.prayerPercentage || 0) < 70
         );
-    }, [stats]);
+    }, [stats, filteredStudents]);
 
     // Derived Stats for Summary Cards
     const summaryStats = useMemo(() => {
@@ -253,6 +254,14 @@ const TeacherDashboard: React.FC = () => {
             <main className="p-4 space-y-6">
 
                 {/* Alerts Section (Critical for Teachers) */}
+
+                {/* SUPER DEBUGGER UI - DELETE LATER */}
+                <div className="bg-amber-100 border-2 border-amber-400 p-4 rounded-xl mb-6 text-sm">
+                    <p className="font-bold">🔍 FILTER DEBUGGER</p>
+                    <p>Status: {selectedClass === 'all' ? 'SEMUA KELAS' : `KELAS ${selectedClass}`}</p>
+                    <p>Total Data: {stats?.students?.length || 0} Siswa</p>
+                    <p>Setelah Filter: {filteredStudents.length} Siswa</p>
+                </div>
 
                 {studentsNeedingAttention.length > 0 && (
                     <section className="animate-[fadeIn_0.5s_ease-out]">
