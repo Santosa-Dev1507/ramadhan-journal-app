@@ -32,7 +32,7 @@ const TeacherDashboard: React.FC = () => {
                 const normalizedStudents = data.students.map((s: any) => ({
                     ...s,
                     name: s.name || s.nama || s.Nama || s.nis || 'Siswa',
-                    class: s.class || s.kelas || s.Kelas || s.KELAS || s.rombel || '?'
+                    class: (s.class || s.kelas || s.Kelas || s.KELAS || s.rombel || '?').toString().trim().toUpperCase()
                 }));
                 console.log("Normalized Students:", normalizedStudents); // Debug
                 setStats({ ...data, students: normalizedStudents });
@@ -253,15 +253,6 @@ const TeacherDashboard: React.FC = () => {
             <main className="p-4 space-y-6">
 
                 {/* Alerts Section (Critical for Teachers) */}
-
-                {/* DEBUG SECTION - REMOVE LATER */}
-                <div className="bg-black text-green-400 p-4 rounded-xl text-xs font-mono overflow-auto max-h-40 border border-green-900 mb-6">
-                    <p className="font-bold underline mb-2">DEBUG INFO (Tolong screenshot ini jika error):</p>
-                    <p>Total Fetched Students: {stats?.students?.length || 0}</p>
-                    <p>Unique Classes Detected (sebelum sort): {JSON.stringify(Array.from(new Set(stats?.students?.map((s: any) => s.class))))}</p>
-                    <p>Raw First Student Keys: {stats?.students?.[0] ? Object.keys(stats.students[0]).join(', ') : 'No Data'}</p>
-                    <p>Raw First Student Valid Class?: {stats?.students?.[0]?.class || 'UNDEFINED'}</p>
-                </div>
 
                 {studentsNeedingAttention.length > 0 && (
                     <section className="animate-[fadeIn_0.5s_ease-out]">
