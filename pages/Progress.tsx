@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getBadges, getStudentHistory } from '../services/api';
+import { getBadges, getStudentHistory, getLeaderboard } from '../services/api';
 import { Badge, JournalEntry, Student } from '../types';
 
 const Progress: React.FC = () => {
@@ -13,6 +13,7 @@ const Progress: React.FC = () => {
         completionRate: 0,
         currentDay: 1
     });
+    const [userRank, setUserRank] = useState<{ rank: number; class: string }>({ rank: 0, class: '-' });
 
     useEffect(() => {
         const calculateGamification = async () => {
@@ -24,7 +25,8 @@ const Progress: React.FC = () => {
             // 2. Get User History
             // In a real app, this fetches from backend. 
             // Here it might return mock data from api.ts, but the LOGIC below is real.
-            const history = await getStudentHistory(user.id);
+            // Retrieve history using NIS or ID fallback
+            const history = await getStudentHistory(user.nis || user.id);
 
             // 3. Calculate Basic Stats
             const totalFasting = history.filter(h => h.fasting.isFasting).length;
@@ -94,6 +96,31 @@ const Progress: React.FC = () => {
         };
 
         calculateGamification();
+        calculateGamification();
+
+        // 5. Get Leaderboard Rank
+        const fetchRank = async () => {
+            const userStr = localStorage.getItem('currentUser');
+            if (!userStr) return;
+            const user = JSON.parse(userStr);
+            const nis = user.nis || user.id;
+
+            try {
+                const leaderboard = await getLeaderboard();
+                // Sort by points desc just in case (though API should handle it)
+                const sorted = leaderboard.sort((a, b) => b.points - a.points);
+                const rankIndex = sorted.findIndex(s => (s.nis || s.id) === nis);
+
+                setUserRank({
+                    rank: rankIndex + 1, // 0-indexed to 1-indexed
+                    class: user.class || user.kelas || "-"
+                });
+            } catch (e) {
+                console.error("Failed to fetch rank", e);
+            }
+        };
+        fetchRank();
+
     }, []);
 
     const getBadgeGradient = (color: string, isUnlocked: boolean) => {
@@ -106,6 +133,41 @@ const Progress: React.FC = () => {
             default: return 'bg-zinc-200 dark:bg-zinc-800 text-zinc-500 border-transparent';
         }
     };
+
+    // Dynamic Motivational Text Logic
+    const getMotivationalMessage = (rate: number) => {
+        const userStr = localStorage.getItem('currentUser');
+        const user = userStr ? JSON.parse(userStr) : null;
+        const name = user?.name ? user.name.split(' ')[0] : 'Sobat'; // Get first name
+
+        if (rate >= 100) {
+            return {
+                title: "Alhamdulillah! 🏆",
+                subtitle: `Luar biasa ${name}, kamu berhasil menaklukkan Ramadhan ini!`,
+                footer: "Taqabbalallahu Minna Wa Minkum. Selamat Idul Fitri!"
+            };
+        } else if (rate >= 71) {
+            return {
+                title: "Sedikit Lagi! 🌙",
+                subtitle: `${name}, kemenangan sudah di depan mata.`,
+                footer: "Malam Lailatul Qadar menantimu, ayo gaspol!"
+            };
+        } else if (rate >= 31) {
+            return {
+                title: "Masya Allah! ⚡",
+                subtitle: `Hebat ${name}, kamu sudah setengah jalan.`,
+                footer: "Jangan kasih kendor ibadahnya!"
+            };
+        } else {
+            return {
+                title: "Bismillah! 🌱",
+                subtitle: `Ayo semangat ${name}, perjalanan baru dimulai.`,
+                footer: "Perjalanan seribu langkah dimulai dari langkah pertama!"
+            };
+        }
+    };
+
+    const motivation = getMotivationalMessage(stats.completionRate);
 
     return (
         <div className="bg-background-light dark:bg-background-dark text-[#111813] dark:text-white pb-24 min-h-screen">
@@ -122,8 +184,8 @@ const Progress: React.FC = () => {
                 {/* Hero */}
                 <section className="mt-6 mb-8">
                     <div className="flex flex-col gap-1 mb-4">
-                        <h2 className="text-3xl font-bold tracking-tight">Ramadhan Kareem 🌙</h2>
-                        <p className="text-sm opacity-70">Masya Allah, perjalananmu luar biasa!</p>
+                        <h2 className="text-3xl font-bold tracking-tight">{motivation.title}</h2>
+                        <p className="text-sm opacity-70">{motivation.subtitle}</p>
                     </div>
                     <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl shadow-sm border border-black/5 dark:border-white/5">
                         <div className="flex justify-between items-end mb-3">
@@ -140,7 +202,7 @@ const Progress: React.FC = () => {
                         </div>
                         <div className="mt-4 flex items-center gap-2 text-sm text-[#61896f] dark:text-primary/80">
                             <span className="material-symbols-outlined text-[18px]">auto_awesome</span>
-                            <p>Terus semangat, sedikit lagi menuju kemenangan!</p>
+                            <p>{motivation.footer}</p>
                         </div>
                     </div>
                 </section>
@@ -206,8 +268,12 @@ const Progress: React.FC = () => {
                 {/* Leaderboard Teaser */}
                 <section className="mt-10 bg-gradient-to-r from-primary to-green-400 p-6 rounded-xl text-[#111813] flex items-center justify-between shadow-lg shadow-primary/20">
                     <div className="flex flex-col">
-                        <h4 className="text-lg font-bold leading-tight">Kamu Peringkat #3</h4>
-                        <p className="text-sm font-medium opacity-80">Di kelas 8-B pekan ini!</p>
+                        <h4 className="text-lg font-bold leading-tight">
+                            {userRank.rank > 0 ? `Kamu Peringkat #${userRank.rank}` : "Peringkat Belum Tersedia"}
+                        </h4>
+                        <p className="text-sm font-medium opacity-80">
+                            {userRank.rank > 0 ? `Di kelas ${userRank.class} pekan ini!` : "Ayo kumpulkan poin!"}
+                        </p>
                     </div>
                     <button
                         onClick={() => navigate('/leaderboard')}

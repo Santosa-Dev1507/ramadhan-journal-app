@@ -259,7 +259,7 @@ export const updateUserProfile = async (student: Student): Promise<boolean> => {
   }
 };
 
-export const getStudentHistory = async (studentId: string): Promise<JournalEntry[]> => {
+export const getStudentHistory = async (nis: string): Promise<JournalEntry[]> => {
   if (USE_MOCK_DATA) {
     await new Promise(resolve => setTimeout(resolve, 800));
     const history: JournalEntry[] = [];
@@ -267,7 +267,7 @@ export const getStudentHistory = async (studentId: string): Promise<JournalEntry
     for (let i = 0; i < 7; i++) {
       const date = new Date(today);
       date.setDate(date.getDate() - i);
-      const isGoodStudent = studentId === '1' || studentId === '4';
+      const isGoodStudent = nis === '1' || nis === '4';
       const randomFactor = isGoodStudent ? 0.9 : 0.5;
 
       history.push({
@@ -305,7 +305,7 @@ export const getStudentHistory = async (studentId: string): Promise<JournalEntry
     return history;
   }
   try {
-    const response = await fetchWithRetry(`${GOOGLE_SCRIPT_URL}?action=getHistory&studentId=${studentId}`);
+    const response = await fetchWithRetry(`${GOOGLE_SCRIPT_URL}?action=getHistory&studentId=${nis}`);
     const result = await response.json();
     return result.status === 'success' ? result.data : [];
   } catch (error) {

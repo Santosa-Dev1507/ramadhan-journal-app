@@ -44,7 +44,7 @@ const TeacherDashboard: React.FC = () => {
     useEffect(() => {
         if (selectedStudent) {
             setIsLoadingHistory(true);
-            getStudentHistory(selectedStudent.id).then(data => {
+            getStudentHistory(selectedStudent.nis || selectedStudent.id).then(data => {
                 setStudentHistory(data);
                 setIsLoadingHistory(false);
             });
