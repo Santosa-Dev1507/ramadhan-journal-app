@@ -214,18 +214,25 @@ export const submitJournal = async (entry: JournalEntry): Promise<boolean> => {
 
   try {
     // Menggunakan fetchWithRetry untuk submit data
-    await fetchWithRetry(GOOGLE_SCRIPT_URL, {
+    const response = await fetchWithRetry(GOOGLE_SCRIPT_URL, {
       method: 'POST',
       body: JSON.stringify({ action: 'submitJournal', ...entry }),
       headers: {
         'Content-Type': 'text/plain;charset=utf-8',
       },
     });
-    return true;
+
+    const result = await response.json();
+    console.log("Submit Response:", result); // Debugging
+
+    if (result.status === 'success') {
+      return true;
+    } else {
+      console.error("Submit failed with status:", result.status, result.message);
+      return false;
+    }
   } catch (error) {
     console.error("Submit journal failed", error);
-    // Don't alert here, let the UI handle it or just log it.
-    // alert("Gagal menyimpan data karena server sibuk. Silakan coba lagi sebentar lagi."); 
     return false;
   }
 };
