@@ -15,6 +15,7 @@ export interface Student {
     prayerPercentage: number; // % Shalat 5 waktu
     jamaahRatio: number;      // % Shalat berjamaah vs Munfarid
     currentJuz: number;       // Posisi tilawah terakhir
+    totalPages?: number;      // Total halaman yang dibaca
   };
 }
 

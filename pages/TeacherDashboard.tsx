@@ -262,13 +262,7 @@ const TeacherDashboard: React.FC = () => {
 
                 {/* Alerts Section (Critical for Teachers) */}
 
-                {/* SUPER DEBUGGER UI - DELETE LATER */}
-                <div className="bg-amber-100 border-2 border-amber-400 p-4 rounded-xl mb-6 text-sm">
-                    <p className="font-bold">🔍 FILTER DEBUGGER</p>
-                    <p>Status: {selectedClass === 'all' ? 'SEMUA KELAS' : `KELAS ${selectedClass}`}</p>
-                    <p>Total Data: {stats?.students?.length || 0} Siswa</p>
-                    <p>Setelah Filter: {filteredStudents.length} Siswa</p>
-                </div>
+
 
                 {studentsNeedingAttention.length > 0 && (
                     <section className="animate-[fadeIn_0.5s_ease-out]">
@@ -404,8 +398,8 @@ const TeacherDashboard: React.FC = () => {
                                 {/* Tilawah */}
                                 <div className="flex flex-col items-center">
                                     <span className="text-[10px] uppercase font-bold text-slate-400 mb-1">Quran</span>
-                                    <span className="text-sm font-bold text-purple-500">Juz {student.stats?.currentJuz || 1}</span>
-                                    <span className="text-[9px] opacity-50">Capaian</span>
+                                    <span className="text-sm font-bold text-purple-500">{student.stats?.totalPages || 0} Hal</span>
+                                    <span className="text-[9px] opacity-50">Dibaca</span>
                                 </div>
                             </div>
 
