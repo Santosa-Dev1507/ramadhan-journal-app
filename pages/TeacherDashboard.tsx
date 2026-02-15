@@ -119,12 +119,31 @@ const TeacherDashboard: React.FC = () => {
 
     const handleDownloadReport = () => {
         if (!filteredStudents.length) return;
-        const headers = ['Nama', 'NIS', 'Kelas', 'Total Poin', 'Jurnal (%)', 'Puasa (Hari)', 'Shalat 5 Waktu (%)', 'Jamaah (%)', 'Tilawah (Juz)'];
+
+        // Helper to calculate grade (A/B/C)
+        const getGrade = (s: Student) => {
+            const score = s.journalCompletion;
+            const prayer = s.stats?.prayerPercentage || 0;
+
+            if (score >= 90 && prayer >= 80) return 'A (Sangat Baik)';
+            if (score >= 75) return 'B (Baik)';
+            if (score >= 60) return 'C (Cukup)';
+            return 'D (Kurang)';
+        };
+
+        const headers = ['Nama', 'NIS', 'Kelas', 'Predikat', 'Total Poin', 'Jurnal (%)', 'Puasa (Hari)', 'Shalat 5 Waktu (%)', 'Tilawah (Hal)'];
         const rows = filteredStudents.map(s => [
-            s.name, s.nis, s.class, s.points, s.journalCompletion,
-            s.stats?.fastingDays || 0, s.stats?.prayerPercentage || 0,
-            s.stats?.jamaahRatio || 0, s.stats?.currentJuz || 0
+            s.name,
+            s.nis,
+            s.class,
+            getGrade(s), // New Grade Column
+            s.points,
+            s.journalCompletion,
+            s.stats?.fastingDays || 0,
+            s.stats?.prayerPercentage || 0,
+            s.stats?.totalPages || 0 // Updated to use totalPages
         ]);
+
         const csvContent = "data:text/csv;charset=utf-8," + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
         const link = document.createElement("a");
         link.setAttribute("href", encodeURI(csvContent));
