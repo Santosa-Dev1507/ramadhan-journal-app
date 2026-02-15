@@ -157,7 +157,7 @@ const Journal: React.FC = () => {
     Object.values(ibadahWajib).filter(Boolean).length;
 
   const totalMandatoryTasks = 1 + 5 + 4;
-  const totalMandatoryTasks = 1 + 5 + 4;
+
   const progress = (mandatoryCompleted / totalMandatoryTasks) * 100;
 
   // Dynamic Motivation Text
