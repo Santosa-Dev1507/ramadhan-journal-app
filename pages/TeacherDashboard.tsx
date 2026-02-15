@@ -19,9 +19,25 @@ const TeacherDashboard: React.FC = () => {
     useEffect(() => {
         const userStr = localStorage.getItem('currentUser');
         if (userStr) {
-            setUser(JSON.parse(userStr));
+            const parsed = JSON.parse(userStr);
+            setUser({
+                ...parsed,
+                name: parsed.name || parsed.nama || parsed.Nama || parsed.nis || 'Guru',
+                class: parsed.class || parsed.kelas || parsed.Kelas || 'Pengajar'
+            });
         }
-        getTeacherStats().then(setStats);
+        getTeacherStats().then(data => {
+            if (data && data.students) {
+                const normalizedStudents = data.students.map((s: any) => ({
+                    ...s,
+                    name: s.name || s.nama || s.Nama || s.nis || 'Siswa',
+                    class: s.class || s.kelas || s.Kelas || '?'
+                }));
+                setStats({ ...data, students: normalizedStudents });
+            } else {
+                setStats(data);
+            }
+        });
     }, []);
 
     // Fetch history when a student is selected
@@ -58,6 +74,30 @@ const TeacherDashboard: React.FC = () => {
         return stats.students.filter((s: Student) =>
             s.journalCompletion < 60 || (s.stats?.prayerPercentage || 0) < 70
         );
+    }, [stats]);
+
+    // Derived Stats for Summary Cards
+    const summaryStats = useMemo(() => {
+        if (!stats || !stats.students.length) return { avgFasting: 0, avgPrayer: 0 };
+
+        // Use filtered students for stats to reflect class selection? 
+        // Typically dashboard stats might be global or filtered. Let's use filtered for better interactivity.
+        const sourceData = filteredStudents.length > 0 ? filteredStudents : stats.students;
+
+        const totalFasting = sourceData.reduce((acc: number, s: Student) => acc + (s.stats?.fastingDays || 0), 0);
+        const totalPrayer = sourceData.reduce((acc: number, s: Student) => acc + (s.stats?.prayerPercentage || 0), 0);
+
+        return {
+            avgFasting: (totalFasting / sourceData.length).toFixed(1),
+            avgPrayer: Math.round(totalPrayer / sourceData.length)
+        };
+    }, [stats, filteredStudents]);
+
+    // Unique Classes for Dropdown
+    const uniqueClasses = useMemo(() => {
+        if (!stats) return [];
+        const classes = new Set(stats.students.map((s: Student) => s.class));
+        return Array.from(classes).sort(); // Alphabetical sort
     }, [stats]);
 
     const handleLogout = () => {
@@ -246,15 +286,15 @@ const TeacherDashboard: React.FC = () => {
                     <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm">
                         <p className="text-xs text-slate-500 font-bold uppercase">Rata2 Puasa</p>
                         <div className="flex items-end gap-2 mt-1">
-                            <span className="text-2xl font-bold">13.5</span>
-                            <span className="text-xs mb-1 opacity-60">/ 15 Hari</span>
+                            <span className="text-2xl font-bold">{summaryStats.avgFasting}</span>
+                            <span className="text-xs mb-1 opacity-60">/ 30 Hari</span>
                         </div>
                     </div>
                     <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm">
                         <p className="text-xs text-slate-500 font-bold uppercase">Kepatuhan Shalat</p>
                         <div className="flex items-end gap-2 mt-1">
-                            <span className="text-2xl font-bold text-primary">88%</span>
-                            <span className="text-xs mb-1 opacity-60">Tertib</span>
+                            <span className="text-2xl font-bold text-primary">{summaryStats.avgPrayer}%</span>
+                            <span className="text-xs mb-1 opacity-60">{summaryStats.avgPrayer > 80 ? 'Sangat Baik' : 'Cukup'}</span>
                         </div>
                     </div>
                 </section>
@@ -268,8 +308,9 @@ const TeacherDashboard: React.FC = () => {
                             className="w-full appearance-none bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-primary outline-none shadow-sm"
                         >
                             <option value="all">Semua Kelas</option>
-                            <option value="9a">Kelas 9-A</option>
-                            <option value="9b">Kelas 9-B</option>
+                            {uniqueClasses.map((cls: any) => (
+                                <option key={cls} value={cls}>{cls}</option>
+                            ))}
                         </select>
                         <span className="material-symbols-outlined absolute right-3 top-3 text-slate-400 pointer-events-none">expand_more</span>
                     </div>

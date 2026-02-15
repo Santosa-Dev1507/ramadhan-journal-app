@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { submitJournal, getJournalEntry } from '../services/api';
 import { PrayerStatus, JournalEntry } from '../types';
+import Toast from '../components/Toast';
 
 const Journal: React.FC = () => {
   const navigate = useNavigate();
@@ -55,6 +56,7 @@ const Journal: React.FC = () => {
 
   const [reflection, setReflection] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [toast, setToast] = useState<{ show: boolean; message: string; type: 'success' | 'error' } | null>(null);
 
   // Load Data Effect
   useEffect(() => {
@@ -159,17 +161,26 @@ const Journal: React.FC = () => {
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
-    await submitJournal({
-      date: currentDate.toISOString(), // Use selected date, not new Date()
-      fasting,
-      prayers,
-      ibadahWajib,
-      ibadahSunnah,
-      reflection
-    });
-    setIsSubmitting(false);
-    // Optional: Show toast instead of alert
-    // alert('Jurnal berhasil disimpan!'); 
+    try {
+      const success = await submitJournal({
+        date: currentDate.toISOString(), // Use selected date, not new Date()
+        fasting,
+        prayers,
+        ibadahWajib,
+        ibadahSunnah,
+        reflection
+      });
+
+      if (success) {
+        setToast({ show: true, message: 'Jurnal berhasil disimpan!', type: 'success' });
+      } else {
+        setToast({ show: true, message: 'Gagal menyimpan jurnal. Silakan coba lagi.', type: 'error' });
+      }
+    } catch (error) {
+      setToast({ show: true, message: 'Terjadi kesalahan sistem.', type: 'error' });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Helper for Prayer UI
@@ -204,6 +215,13 @@ const Journal: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark text-[#111813] dark:text-white pb-24">
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
       {/* Header */}
       <header className="flex items-center bg-white dark:bg-background-dark p-4 pb-2 justify-between sticky top-0 z-20 border-b border-gray-100 dark:border-gray-800 shadow-sm transition-all">
         {/* Placeholder for left side to balance */}

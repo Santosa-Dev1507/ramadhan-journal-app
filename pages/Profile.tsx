@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Student } from '../types';
 import { AVATARS, AvatarId } from '../config/avatars';
-import { updateUserProfile } from '../services/api';
+import { updateUserProfile, loginUser } from '../services/api';
 
 const Profile: React.FC = () => {
     const navigate = useNavigate();
@@ -105,9 +105,12 @@ const Profile: React.FC = () => {
                             <span className="material-symbols-outlined text-xs">verified</span>
                         </div>
                     </div>
-                    <h2 className="text-xl font-bold mb-2">{user.name}</h2>
+                    <h2 className="text-xl font-bold mb-1">
+                        {user.name || (user as any).nama || (user as any).Nama || user.nis || "Nama Tidak Ditemukan"}
+                    </h2>
+                    <p className="text-sm text-slate-500 mb-2">{user.nis}</p>
                     <div className="inline-block px-3 py-1 bg-primary/10 text-primary text-xs font-bold rounded-full uppercase tracking-wider">
-                        {user.class}
+                        {user.class || (user as any).kelas || (user as any).Kelas || "Kelas ?"}
                     </div>
                 </div>
             </div>

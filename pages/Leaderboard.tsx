@@ -11,11 +11,21 @@ const Leaderboard: React.FC = () => {
     useEffect(() => {
         const savedUser = localStorage.getItem('currentUser');
         if (savedUser) {
-            setCurrentUser(JSON.parse(savedUser));
+            const parsed = JSON.parse(savedUser);
+            setCurrentUser({
+                ...parsed,
+                name: parsed.name || parsed.nama || parsed.Nama || parsed.nis || 'Siswa',
+                class: parsed.class || parsed.kelas || parsed.Kelas || '?'
+            });
         }
 
         getLeaderboard().then(data => {
-            setStudents(data);
+            const normalizedData = data.map((s: any) => ({
+                ...s,
+                name: s.name || s.nama || s.Nama || s.nis || 'Siswa',
+                class: s.class || s.kelas || s.Kelas || '?'
+            }));
+            setStudents(normalizedData);
             setIsLoading(false);
         });
     }, []);
