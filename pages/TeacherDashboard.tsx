@@ -7,7 +7,7 @@ const TeacherDashboard: React.FC = () => {
     const [stats, setStats] = useState<any>(null);
     const [user, setUser] = useState<Student | null>(null);
     const [selectedClass, setSelectedClass] = useState('all');
-    const [sortBy, setSortBy] = useState<'name' | 'rank' | 'completion_asc'>('rank');
+    const [sortBy, setSortBy] = useState<'name' | 'rank' | 'completion_asc' | 'issue_journal' | 'issue_prayer'>('rank');
 
     // Detail View State
     const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
@@ -59,6 +59,13 @@ const TeacherDashboard: React.FC = () => {
 
         if (selectedClass !== 'all') {
             students = students.filter(s => s.class === selectedClass);
+        }
+
+        // Feature: Special Filter Modes via Sort Dropdown
+        if (sortBy === 'issue_journal') {
+            students = students.filter(s => s.journalCompletion === 0);
+        } else if (sortBy === 'issue_prayer') {
+            students = students.filter(s => (s.stats?.prayerPercentage || 0) < 50);
         }
 
         students.sort((a, b) => {
@@ -328,15 +335,19 @@ const TeacherDashboard: React.FC = () => {
                         </select>
                         <span className="material-symbols-outlined absolute right-3 top-3 text-slate-400 pointer-events-none">expand_more</span>
                     </div>
-                    <div className="relative w-1/3">
+                    {/* Sort Dropdown */}
+                    <div className="relative">
                         <select
                             value={sortBy}
                             onChange={(e) => setSortBy(e.target.value as any)}
-                            className="w-full appearance-none bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-primary outline-none shadow-sm"
+                            className="appearance-none bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2 pr-10 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary/20"
                         >
-                            <option value="rank">Poin</option>
-                            <option value="completion_asc">Terendah</option>
-                            <option value="name">Nama</option>
+                            <option value="rank">Poin Tertinggi</option>
+                            <option value="completion_asc">Terendah (Evaluasi)</option>
+                            <option value="name">Nama (A-Z)</option>
+                            <option disabled>--- Filter Masalah ---</option>
+                            <option value="issue_journal">⚠️ Jurnal Kosong (0%)</option>
+                            <option value="issue_prayer">⚠️ Shalat &lt; 50%</option>
                         </select>
                         <span className="material-symbols-outlined absolute right-3 top-3 text-slate-400 pointer-events-none">sort</span>
                     </div>
