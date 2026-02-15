@@ -27,12 +27,14 @@ const TeacherDashboard: React.FC = () => {
             });
         }
         getTeacherStats().then(data => {
+            console.log("TeacherStats Raw:", data); // Debug
             if (data && data.students) {
                 const normalizedStudents = data.students.map((s: any) => ({
                     ...s,
                     name: s.name || s.nama || s.Nama || s.nis || 'Siswa',
-                    class: s.class || s.kelas || s.Kelas || '?'
+                    class: s.class || s.kelas || s.Kelas || s.KELAS || s.rombel || '?'
                 }));
+                console.log("Normalized Students:", normalizedStudents); // Debug
                 setStats({ ...data, students: normalizedStudents });
             } else {
                 setStats(data);
@@ -56,9 +58,7 @@ const TeacherDashboard: React.FC = () => {
         let students: Student[] = [...stats.students];
 
         if (selectedClass !== 'all') {
-            if (selectedClass !== 'all') {
-                students = students.filter(s => s.class === selectedClass);
-            }
+            students = students.filter(s => s.class === selectedClass);
         }
 
         students.sort((a, b) => {
@@ -98,8 +98,10 @@ const TeacherDashboard: React.FC = () => {
     // Unique Classes for Dropdown
     const uniqueClasses = useMemo(() => {
         if (!stats) return [];
-        const classes = new Set(stats.students.map((s: Student) => s.class));
-        return Array.from(classes).sort(); // Alphabetical sort
+        const classes = new Set(stats.students.map((s: Student) => s.class).filter(Boolean));
+        const arr = Array.from(classes).sort();
+        console.log("Unique Classes:", arr); // Debug
+        return arr;
     }, [stats]);
 
     const handleLogout = () => {
