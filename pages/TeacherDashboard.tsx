@@ -56,7 +56,9 @@ const TeacherDashboard: React.FC = () => {
         let students: Student[] = [...stats.students];
 
         if (selectedClass !== 'all') {
-            // Mock filter logic
+            if (selectedClass !== 'all') {
+                students = students.filter(s => s.class === selectedClass);
+            }
         }
 
         students.sort((a, b) => {

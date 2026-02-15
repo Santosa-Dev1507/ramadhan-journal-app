@@ -157,7 +157,15 @@ const Journal: React.FC = () => {
     Object.values(ibadahWajib).filter(Boolean).length;
 
   const totalMandatoryTasks = 1 + 5 + 4;
+  const totalMandatoryTasks = 1 + 5 + 4;
   const progress = (mandatoryCompleted / totalMandatoryTasks) * 100;
+
+  // Dynamic Motivation Text
+  const getMotivationText = (prog: number) => {
+    if (prog === 0) return "Bismillah, jangan lupa catat ibadahmu hari ini ya!";
+    if (prog >= 100) return "Alhamdulillah, target hari ini tercapai sempurna!";
+    return "MasyaAllah, lanjutkan istiqamahmu!";
+  };
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
@@ -303,7 +311,7 @@ const Journal: React.FC = () => {
         </div>
         <div className="flex items-center gap-2">
           <span className="material-symbols-outlined text-primary text-sm">auto_awesome</span>
-          <p className="text-[#61896f] dark:text-primary/70 text-sm font-medium">MasyaAllah, lanjutkan istiqamahmu!</p>
+          <p className="text-[#61896f] dark:text-primary/70 text-sm font-medium">{getMotivationText(progress)}</p>
         </div>
       </div>
 
