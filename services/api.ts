@@ -202,7 +202,7 @@ export const getJournalEntry = async (dateIsoString: string): Promise<JournalEnt
   }
 }
 
-export const submitJournal = async (entry: JournalEntry): Promise<boolean> => {
+export const submitJournal = async (entry: JournalEntry, nis: string): Promise<boolean> => {
   const dateKey = entry.date.split('T')[0];
 
   if (USE_MOCK_DATA) {
@@ -216,7 +216,7 @@ export const submitJournal = async (entry: JournalEntry): Promise<boolean> => {
     // Menggunakan fetchWithRetry untuk submit data
     const response = await fetchWithRetry(GOOGLE_SCRIPT_URL, {
       method: 'POST',
-      body: JSON.stringify({ action: 'submitJournal', ...entry }),
+      body: JSON.stringify({ action: 'submitJournal', nis, ...entry }),
       headers: {
         'Content-Type': 'text/plain;charset=utf-8',
       },

@@ -161,6 +161,15 @@ const Journal: React.FC = () => {
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
+    const savedUser = localStorage.getItem('currentUser');
+    const user = savedUser ? JSON.parse(savedUser) : null;
+
+    if (!user || !user.nis) {
+      setToast({ show: true, message: 'Gagal: Sesi pengguna tidak valid. Silakan login ulang.', type: 'error' });
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
       const success = await submitJournal({
         date: currentDate.toISOString(), // Use selected date, not new Date()
@@ -169,7 +178,7 @@ const Journal: React.FC = () => {
         ibadahWajib,
         ibadahSunnah,
         reflection
-      });
+      }, user.nis);
 
       if (success) {
         setToast({ show: true, message: 'Jurnal berhasil disimpan!', type: 'success' });
