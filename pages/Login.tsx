@@ -30,7 +30,7 @@ const Login: React.FC = () => {
         navigate('/goal-setup');
       }
     } else {
-      setError('NIS tidak ditemukan. Coba "12345678" atau "TEACHER01"');
+      setError('NIS tidak ditemukan. Hubungi guru PAI kamu.');
     }
   };
 
