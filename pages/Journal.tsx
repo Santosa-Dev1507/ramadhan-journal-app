@@ -12,6 +12,7 @@ const Journal: React.FC = () => {
   const [ramadhanDay, setRamadhanDay] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [hasExistingEntry, setHasExistingEntry] = useState(false);
 
   // 1. Puasa (Wajib)
   const [fasting, setFasting] = useState({
@@ -67,12 +68,14 @@ const Journal: React.FC = () => {
 
       if (entry) {
         // Populate form with existing data
+        setHasExistingEntry(true);
         setFasting(entry.fasting);
         setPrayers(entry.prayers);
         setIbadahWajib(entry.ibadahWajib);
         setIbadahSunnah(entry.ibadahSunnah);
         setReflection(entry.reflection);
       } else {
+        setHasExistingEntry(false);
         // Reset form to defaults
         setFasting({ isFasting: true, reason: '' });
         setPrayers({ subuh: 'none', dzuhur: 'none', ashar: 'none', maghrib: 'none', isya: 'none' });
@@ -168,6 +171,13 @@ const Journal: React.FC = () => {
   };
 
   const handleSubmit = async () => {
+    // If entry exists for this date and modal not yet shown, ask for confirmation
+    if (hasExistingEntry && !showConfirmModal) {
+      setShowConfirmModal(true);
+      return;
+    }
+
+    setShowConfirmModal(false);
     setIsSubmitting(true);
     const savedUser = localStorage.getItem('currentUser');
     const user = savedUser ? JSON.parse(savedUser) : null;
@@ -180,7 +190,7 @@ const Journal: React.FC = () => {
 
     try {
       const success = await submitJournal({
-        date: currentDate.toISOString(), // Use selected date, not new Date()
+        date: currentDate.toISOString(),
         fasting,
         prayers,
         ibadahWajib,
@@ -189,6 +199,7 @@ const Journal: React.FC = () => {
       }, user.nis);
 
       if (success) {
+        setHasExistingEntry(true);
         setToast({ show: true, message: 'Jurnal berhasil disimpan!', type: 'success' });
       } else {
         setToast({ show: true, message: 'Gagal menyimpan jurnal. Silakan coba lagi.', type: 'error' });
@@ -605,6 +616,37 @@ const Journal: React.FC = () => {
         />
       </section>
 
+      {/* Confirmation Modal */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-[fadeIn_0.2s_ease-out]">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 rounded-full bg-orange-100 dark:bg-orange-900/30">
+                <span className="material-symbols-outlined text-orange-500 text-2xl">warning</span>
+              </div>
+              <h3 className="text-lg font-bold">Jurnal Sudah Terisi</h3>
+            </div>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+              Kamu sudah mengisi jurnal untuk tanggal ini. Data sebelumnya akan <strong>ditimpa</strong> dengan data baru. Lanjutkan?
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowConfirmModal(false)}
+                className="flex-1 py-3 rounded-xl border border-gray-200 dark:border-gray-700 font-semibold text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+              >
+                Batal
+              </button>
+              <button
+                onClick={handleSubmit}
+                className="flex-1 py-3 rounded-xl bg-primary text-[#102216] font-bold text-sm hover:scale-[0.98] transition-transform"
+              >
+                Ya, Timpa
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Action */}
       <div className="p-4 mt-4 space-y-4">
         <button
@@ -614,8 +656,8 @@ const Journal: React.FC = () => {
         >
           {isSubmitting ? 'Menyimpan...' : (
             <>
-              Simpan Jurnal {isToday() ? 'Hari Ini' : 'Tanggal Ini'}
-              <span className="material-symbols-outlined font-variation-filled">check_circle</span>
+              {hasExistingEntry ? 'Perbarui' : 'Simpan'} Jurnal {isToday() ? 'Hari Ini' : 'Tanggal Ini'}
+              <span className="material-symbols-outlined font-variation-filled">{hasExistingEntry ? 'edit' : 'check_circle'}</span>
             </>
           )}
         </button>
