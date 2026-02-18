@@ -13,15 +13,15 @@ const GoalSetup: React.FC = () => {
     // Check if user already has a preference stored locally
     const savedUser = localStorage.getItem('currentUser');
     if (savedUser) {
-        const user = JSON.parse(savedUser);
-        if (user.startRamadhanDate) {
-            setStartDate(user.startRamadhanDate);
-        }
+      const user = JSON.parse(savedUser);
+      if (user.startRamadhanDate) {
+        setStartDate(user.startRamadhanDate);
+      }
     }
   }, []);
 
   const toggleGoal = (id: string) => {
-    setGoals(current => 
+    setGoals(current =>
       current.map(g => {
         if (g.type === 'mandatory') return g; // Cannot toggle mandatory
         if (g.id === id) return { ...g, isSelected: !g.isSelected };
@@ -31,23 +31,25 @@ const GoalSetup: React.FC = () => {
   };
 
   const handleStart = () => {
-      // Save start date preference
-      const savedUser = localStorage.getItem('currentUser');
-      if (savedUser) {
-          const user = JSON.parse(savedUser);
-          user.startRamadhanDate = startDate;
-          localStorage.setItem('currentUser', JSON.stringify(user));
-      }
-      navigate('/journal');
+    // Save start date preference
+    const savedUser = localStorage.getItem('currentUser');
+    if (savedUser) {
+      const user = JSON.parse(savedUser);
+      user.startRamadhanDate = startDate;
+      localStorage.setItem('currentUser', JSON.stringify(user));
+      // Simpan terpisah per-NIS agar tidak hilang saat logout
+      localStorage.setItem(`ramadhan_start_${user.nis}`, startDate);
+    }
+    navigate('/journal');
   };
 
   const getIconColorBg = (color?: string) => {
-    switch(color) {
-        case 'orange': return 'bg-orange-100 text-orange-500 dark:bg-orange-900/30';
-        case 'blue': return 'bg-blue-100 text-blue-500 dark:bg-blue-900/30';
-        case 'purple': return 'bg-purple-100 text-purple-500 dark:bg-purple-900/30';
-        case 'pink': return 'bg-pink-100 text-pink-500 dark:bg-pink-900/30';
-        default: return 'bg-primary/10 text-primary';
+    switch (color) {
+      case 'orange': return 'bg-orange-100 text-orange-500 dark:bg-orange-900/30';
+      case 'blue': return 'bg-blue-100 text-blue-500 dark:bg-blue-900/30';
+      case 'purple': return 'bg-purple-100 text-purple-500 dark:bg-purple-900/30';
+      case 'pink': return 'bg-pink-100 text-pink-500 dark:bg-pink-900/30';
+      default: return 'bg-primary/10 text-primary';
     }
   };
 
@@ -81,32 +83,32 @@ const GoalSetup: React.FC = () => {
       </div>
 
       <div className="flex-1 px-4 space-y-8">
-        
+
         {/* Date Selection */}
         <div className="bg-primary/5 dark:bg-primary/10 p-4 rounded-xl border border-primary/20">
-            <div className="flex items-center gap-2 mb-3">
-                <span className="material-symbols-outlined text-primary">calendar_month</span>
-                <h3 className="text-sm font-bold uppercase tracking-wide">Kapan Kamu Mulai Puasa?</h3>
+          <div className="flex items-center gap-2 mb-3">
+            <span className="material-symbols-outlined text-primary">calendar_month</span>
+            <h3 className="text-sm font-bold uppercase tracking-wide">Kapan Kamu Mulai Puasa?</h3>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div
+              onClick={() => setStartDate('2026-02-18')}
+              className={`cursor-pointer border rounded-lg p-3 text-center transition-all ${startDate === '2026-02-18' ? 'bg-primary text-[#102216] border-primary ring-2 ring-primary/30' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-primary/50'}`}
+            >
+              <p className="text-xs opacity-70 mb-1">Muhammadiyah</p>
+              <p className="font-bold text-lg">18 Feb</p>
+              <p className="text-[10px] uppercase font-bold tracking-wider opacity-60">Rabu</p>
             </div>
-            <div className="grid grid-cols-2 gap-3">
-                <div 
-                    onClick={() => setStartDate('2026-02-18')}
-                    className={`cursor-pointer border rounded-lg p-3 text-center transition-all ${startDate === '2026-02-18' ? 'bg-primary text-[#102216] border-primary ring-2 ring-primary/30' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-primary/50'}`}
-                >
-                    <p className="text-xs opacity-70 mb-1">Muhammadiyah</p>
-                    <p className="font-bold text-lg">18 Feb</p>
-                    <p className="text-[10px] uppercase font-bold tracking-wider opacity-60">Rabu</p>
-                </div>
-                <div 
-                    onClick={() => setStartDate('2026-02-19')}
-                    className={`cursor-pointer border rounded-lg p-3 text-center transition-all ${startDate === '2026-02-19' ? 'bg-primary text-[#102216] border-primary ring-2 ring-primary/30' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-primary/50'}`}
-                >
-                    <p className="text-xs opacity-70 mb-1">Pemerintah / NU</p>
-                    <p className="font-bold text-lg">19 Feb</p>
-                    <p className="text-[10px] uppercase font-bold tracking-wider opacity-60">Kamis</p>
-                </div>
+            <div
+              onClick={() => setStartDate('2026-02-19')}
+              className={`cursor-pointer border rounded-lg p-3 text-center transition-all ${startDate === '2026-02-19' ? 'bg-primary text-[#102216] border-primary ring-2 ring-primary/30' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-primary/50'}`}
+            >
+              <p className="text-xs opacity-70 mb-1">Pemerintah / NU</p>
+              <p className="font-bold text-lg">19 Feb</p>
+              <p className="text-[10px] uppercase font-bold tracking-wider opacity-60">Kamis</p>
             </div>
-            <p className="text-xs mt-3 text-center opacity-60">Pilihan ini menentukan hitungan "Hari ke-X" di jurnalmu.</p>
+          </div>
+          <p className="text-xs mt-3 text-center opacity-60">Pilihan ini menentukan hitungan "Hari ke-X" di jurnalmu.</p>
         </div>
 
         {/* Mandatory */}
@@ -149,11 +151,11 @@ const GoalSetup: React.FC = () => {
                   <h4 className="font-bold">{goal.title}</h4>
                   <p className="text-xs opacity-50">{goal.description}</p>
                 </div>
-                <input 
-                    type="checkbox" 
-                    checked={goal.isSelected}
-                    onChange={() => toggleGoal(goal.id)}
-                    className="w-6 h-6 rounded-full border-slate-300 text-primary focus:ring-primary focus:ring-offset-0 bg-slate-50" 
+                <input
+                  type="checkbox"
+                  checked={goal.isSelected}
+                  onChange={() => toggleGoal(goal.id)}
+                  className="w-6 h-6 rounded-full border-slate-300 text-primary focus:ring-primary focus:ring-offset-0 bg-slate-50"
                 />
               </label>
             ))}
@@ -163,12 +165,12 @@ const GoalSetup: React.FC = () => {
 
       {/* Sticky Bottom */}
       <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto p-6 bg-gradient-to-t from-background-light dark:from-background-dark via-background-light/95 dark:via-background-dark/95 to-transparent z-50">
-        <button 
-            onClick={handleStart}
-            className="w-full bg-primary hover:brightness-105 active:scale-[0.98] text-slate-900 font-bold py-4 px-6 rounded-xl shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2"
+        <button
+          onClick={handleStart}
+          className="w-full bg-primary hover:brightness-105 active:scale-[0.98] text-slate-900 font-bold py-4 px-6 rounded-xl shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2"
         >
-            Mulai Perjalananku
-            <span className="material-symbols-outlined">arrow_forward</span>
+          Mulai Perjalananku
+          <span className="material-symbols-outlined">arrow_forward</span>
         </button>
         <p className="text-center text-xs opacity-40 mt-3 font-medium">Kamu bisa mengubahnya nanti di pengaturan</p>
       </div>

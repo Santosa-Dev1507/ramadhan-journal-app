@@ -20,16 +20,11 @@ const Login: React.FC = () => {
     setIsLoading(false);
 
     if (user) {
-      // Merge dengan data lama di localStorage agar preferensi (startRamadhanDate, avatarId) tidak hilang
-      const existingStr = localStorage.getItem('currentUser');
-      const existing = existingStr ? JSON.parse(existingStr) : {};
+      // Ambil startRamadhanDate dari storage terpisah per-NIS (tidak hilang saat logout)
+      const savedStartDate = localStorage.getItem(`ramadhan_start_${user.nis}`);
       const mergedUser = {
-        ...existing,
         ...user,
-        // Pertahankan preferensi lokal jika tidak ada di response API
-        startRamadhanDate: user.startRamadhanDate || existing.startRamadhanDate,
-        avatarId: user.avatarId || existing.avatarId,
-        avatarUrl: user.avatarUrl || existing.avatarUrl,
+        startRamadhanDate: user.startRamadhanDate || savedStartDate || '',
       };
       localStorage.setItem('currentUser', JSON.stringify(mergedUser));
 

@@ -37,6 +37,8 @@ const Profile: React.FC = () => {
 
             if (success) {
                 localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+                // Simpan terpisah per-NIS agar tidak hilang saat logout
+                localStorage.setItem(`ramadhan_start_${user.nis}`, startDate);
                 setUser(updatedUser);
                 alert('Pengaturan berhasil disimpan');
             } else {
