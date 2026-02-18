@@ -20,13 +20,24 @@ const Login: React.FC = () => {
     setIsLoading(false);
 
     if (user) {
-      localStorage.setItem('currentUser', JSON.stringify(user));
+      // Merge dengan data lama di localStorage agar preferensi (startRamadhanDate, avatarId) tidak hilang
+      const existingStr = localStorage.getItem('currentUser');
+      const existing = existingStr ? JSON.parse(existingStr) : {};
+      const mergedUser = {
+        ...existing,
+        ...user,
+        // Pertahankan preferensi lokal jika tidak ada di response API
+        startRamadhanDate: user.startRamadhanDate || existing.startRamadhanDate,
+        avatarId: user.avatarId || existing.avatarId,
+        avatarUrl: user.avatarUrl || existing.avatarUrl,
+      };
+      localStorage.setItem('currentUser', JSON.stringify(mergedUser));
 
       // Redirect based on user role (case-insensitive + support 'Guru')
-      const userClass = (user.class || '').toLowerCase();
+      const userClass = (mergedUser.class || '').toLowerCase();
       if (userClass === 'teacher' || userClass === 'guru') {
         navigate('/teacher');
-      } else if (user.startRamadhanDate) {
+      } else if (mergedUser.startRamadhanDate) {
         // Sudah pernah setup → langsung ke jurnal
         navigate('/journal');
       } else {
