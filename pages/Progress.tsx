@@ -31,9 +31,11 @@ const Progress: React.FC = () => {
             // 3. Calculate Basic Stats
             const totalFasting = history.filter(h => h.fasting.isFasting).length;
 
-            // Hitung jumlah hari unik yang sudah diisi jurnal
-            const uniqueDates = new Set(history.map(h => h.date.split('T')[0]));
-            const totalJournalDays = uniqueDates.size;
+            // Hitung jumlah hari jurnal:
+            // Prioritas 1: user.journalCompletion dari backend (selalu akurat)
+            // Prioritas 2: hitung dari history jika API getHistory bekerja
+            const totalJournalDays = user.journalCompletion ||
+                (history.length > 0 ? new Set(history.map(h => h.date.split('T')[0])).size : 0);
             const completionRate = Math.round((totalJournalDays / 30) * 100);
 
             // Calculate Streak (Consecutive days backward from today)
