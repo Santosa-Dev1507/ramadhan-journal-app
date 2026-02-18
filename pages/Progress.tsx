@@ -31,6 +31,11 @@ const Progress: React.FC = () => {
             // 3. Calculate Basic Stats
             const totalFasting = history.filter(h => h.fasting.isFasting).length;
 
+            // Hitung jumlah hari unik yang sudah diisi jurnal
+            const uniqueDates = new Set(history.map(h => h.date.split('T')[0]));
+            const totalJournalDays = uniqueDates.size;
+            const completionRate = Math.round((totalJournalDays / 30) * 100);
+
             // Calculate Streak (Consecutive days backward from today)
             // Simplified logic for demo
             const streak = user.streak || 0;
@@ -87,15 +92,14 @@ const Progress: React.FC = () => {
 
             setBadges(calculatedBadges);
             setStats({
-                totalFasting,
+                totalFasting: totalJournalDays,
                 totalPoints: user.points,
                 streak: streak,
-                completionRate: user.journalCompletion,
-                currentDay: totalFasting + 1 // Mock logic for current day
+                completionRate: completionRate,
+                currentDay: totalJournalDays
             });
         };
 
-        calculateGamification();
         calculateGamification();
 
         // 5. Get Leaderboard Rank

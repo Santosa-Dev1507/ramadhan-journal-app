@@ -26,7 +26,11 @@ const Login: React.FC = () => {
       const userClass = (user.class || '').toLowerCase();
       if (userClass === 'teacher' || userClass === 'guru') {
         navigate('/teacher');
+      } else if (user.startRamadhanDate) {
+        // Sudah pernah setup → langsung ke jurnal
+        navigate('/journal');
       } else {
+        // Pertama kali login → setup tanggal puasa dulu
         navigate('/goal-setup');
       }
     } else {

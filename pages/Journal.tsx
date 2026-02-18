@@ -11,7 +11,6 @@ const Journal: React.FC = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [ramadhanDay, setRamadhanDay] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [hasExistingEntry, setHasExistingEntry] = useState(false);
 
   // 1. Puasa (Wajib)
@@ -135,6 +134,7 @@ const Journal: React.FC = () => {
   };
 
   const cyclePrayerStatus = (key: keyof typeof prayers) => {
+    if (hasExistingEntry) return;
     setPrayers(prev => {
       const current = prev[key];
       let next: PrayerStatus = 'none';
@@ -146,10 +146,12 @@ const Journal: React.FC = () => {
   };
 
   const toggleWajib = (key: keyof typeof ibadahWajib) => {
+    if (hasExistingEntry) return;
     setIbadahWajib(p => ({ ...p, [key]: !p[key] }));
   };
 
   const toggleSunnah = (key: keyof typeof ibadahSunnah) => {
+    if (hasExistingEntry) return;
     setIbadahSunnah(p => ({ ...p, [key]: !p[key] }));
   };
 
@@ -171,13 +173,9 @@ const Journal: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    // If entry exists for this date and modal not yet shown, ask for confirmation
-    if (hasExistingEntry && !showConfirmModal) {
-      setShowConfirmModal(true);
-      return;
-    }
+    // Jika sudah ada entry untuk tanggal ini, tidak boleh submit lagi
+    if (hasExistingEntry) return;
 
-    setShowConfirmModal(false);
     setIsSubmitting(true);
     const savedUser = localStorage.getItem('currentUser');
     const user = savedUser ? JSON.parse(savedUser) : null;
@@ -200,7 +198,7 @@ const Journal: React.FC = () => {
 
       if (success) {
         setHasExistingEntry(true);
-        setToast({ show: true, message: 'Jurnal berhasil disimpan!', type: 'success' });
+        setToast({ show: true, message: 'Jurnal berhasil disimpan! Data terkunci untuk tanggal ini.', type: 'success' });
       } else {
         setToast({ show: true, message: 'Gagal menyimpan jurnal. Silakan coba lagi.', type: 'error' });
       }
@@ -326,20 +324,39 @@ const Journal: React.FC = () => {
         </div>
       </div>
 
+      {/* Warning Banner - Lock per hari */}
+      <div className="px-4">
+        {!hasExistingEntry ? (
+          <div className="flex items-start gap-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-3 rounded-lg">
+            <span className="material-symbols-outlined text-amber-500 text-lg mt-0.5 shrink-0">warning</span>
+            <p className="text-xs text-amber-800 dark:text-amber-200 leading-relaxed">
+              <strong>Perhatian:</strong> Jurnal hanya bisa diisi <strong>1x per hari</strong>. Pastikan semua data sudah benar sebelum menyimpan karena tidak bisa diubah lagi.
+            </p>
+          </div>
+        ) : (
+          <div className="flex items-start gap-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 p-3 rounded-lg">
+            <span className="material-symbols-outlined text-green-600 text-lg mt-0.5 shrink-0">lock</span>
+            <p className="text-xs text-green-800 dark:text-green-200 leading-relaxed">
+              <strong>Terkunci:</strong> Jurnal untuk tanggal ini sudah disimpan dan tidak dapat diubah.
+            </p>
+          </div>
+        )}
+      </div>
+
       {/* 1. Puasa (Wajib) */}
       <section className="mt-2">
         <div className="flex items-center justify-between px-4 pb-2 pt-4">
           <h3 className="text-lg font-bold">Puasa Ramadhan</h3>
           <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded font-bold">WAJIB</span>
         </div>
-        <div className="px-4">
+        <div className={`px-4 ${hasExistingEntry ? 'opacity-60 pointer-events-none' : ''}`}>
           <div className={`rounded-xl border transition-all duration-200 ${fasting.isFasting
             ? 'bg-white dark:bg-gray-800/50 border-gray-100 dark:border-gray-800'
             : 'bg-orange-50 dark:bg-orange-900/10 border-orange-200 dark:border-orange-800/30'
             }`}>
             <div
-              onClick={() => setFasting(prev => ({ ...prev, isFasting: !prev.isFasting }))}
-              className="flex items-center justify-between p-4 cursor-pointer"
+              onClick={() => !hasExistingEntry && setFasting(prev => ({ ...prev, isFasting: !prev.isFasting }))}
+              className={`flex items-center justify-between p-4 ${hasExistingEntry ? 'cursor-not-allowed' : 'cursor-pointer'}`}
             >
               <div className="flex items-center gap-3">
                 <div className={`p-2 rounded-lg ${fasting.isFasting ? 'bg-primary/10 text-primary' : 'bg-orange-100 text-orange-500'}`}>
@@ -361,9 +378,10 @@ const Journal: React.FC = () => {
                 <input
                   type="text"
                   value={fasting.reason}
-                  onChange={(e) => setFasting(prev => ({ ...prev, reason: e.target.value }))}
+                  onChange={(e) => !hasExistingEntry && setFasting(prev => ({ ...prev, reason: e.target.value }))}
                   placeholder="Contoh: Sedang Haid / Sakit / Musafir"
-                  className="w-full bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-2.5 text-sm focus:ring-primary focus:border-primary transition-all"
+                  disabled={hasExistingEntry}
+                  className="w-full bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-2.5 text-sm focus:ring-primary focus:border-primary transition-all disabled:opacity-50"
                 />
               </div>
             )}
@@ -371,7 +389,7 @@ const Journal: React.FC = () => {
         </div>
       </section>
 
-      {/* 2. Shalat 5 Waktu (Wajib) */}
+      {/* 2. Shalat 5 Waktu (Wajib) - disabled jika sudah terisi */}
       <section className="mt-4">
         <div className="flex items-center justify-between px-4 pb-2 pt-2">
           <h3 className="text-lg font-bold">Shalat 5 Waktu</h3>
@@ -394,7 +412,7 @@ const Journal: React.FC = () => {
           <p className="text-[10px] text-center mt-1 opacity-50">Tap 2x jika shalat sendiri</p>
         </div>
 
-        <div className="px-4 space-y-1">
+        <div className={`px-4 space-y-1 ${hasExistingEntry ? 'opacity-60 pointer-events-none' : ''}`}>
           {Object.entries(prayers).map(([key, value]) => {
             const ui = getPrayerUI(value as PrayerStatus);
             return (
@@ -427,7 +445,7 @@ const Journal: React.FC = () => {
           <h3 className="text-lg font-bold">Target Sekolah</h3>
           <span className="text-xs bg-purple-100 text-purple-600 px-2 py-0.5 rounded font-bold">DIANJURKAN</span>
         </div>
-        <div className="px-4 space-y-3">
+        <div className={`px-4 space-y-3 ${hasExistingEntry ? 'opacity-60 pointer-events-none' : ''}`}>
           {/* Tilawah */}
           <div className="flex items-center justify-between py-3 px-4 border border-gray-100 dark:border-gray-800 rounded-xl shadow-sm bg-white dark:bg-background-dark">
             <div className="flex items-center gap-3">
@@ -523,7 +541,7 @@ const Journal: React.FC = () => {
           <h3 className="text-lg font-bold">Amalan Tambahan</h3>
           <span className="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded font-bold">TIDAK WAJIB</span>
         </div>
-        <div className="px-4 space-y-3">
+        <div className={`px-4 space-y-3 ${hasExistingEntry ? 'opacity-60 pointer-events-none' : ''}`}>
           {/* Iktikaf */}
           <div onClick={() => toggleSunnah('iktikaf')} className="flex items-center justify-between py-3 px-4 border border-gray-100 dark:border-gray-800 rounded-xl shadow-sm cursor-pointer bg-white dark:bg-background-dark">
             <div className="flex items-center gap-3">
@@ -602,66 +620,48 @@ const Journal: React.FC = () => {
       </section>
 
       {/* Reflection */}
-      <section className="mt-6 px-4">
+      <section className={`mt-6 px-4 ${hasExistingEntry ? 'opacity-60' : ''}`}>
         <div className="flex items-center gap-2 mb-2">
           <span className="material-symbols-outlined text-primary text-xl">edit_note</span>
           <h3 className="text-lg font-bold">Refleksi Singkat</h3>
         </div>
         <textarea
           value={reflection}
-          onChange={(e) => setReflection(e.target.value)}
-          className="w-full rounded-xl border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 p-4 text-sm focus:ring-primary focus:border-primary dark:text-white resize-none"
+          onChange={(e) => !hasExistingEntry && setReflection(e.target.value)}
+          disabled={hasExistingEntry}
+          className="w-full rounded-xl border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 p-4 text-sm focus:ring-primary focus:border-primary dark:text-white resize-none disabled:opacity-50"
           placeholder="Apa hal terbaik yang kamu lakukan hari ini?"
           rows={4}
         />
       </section>
 
-      {/* Confirmation Modal */}
-      {showConfirmModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-[fadeIn_0.2s_ease-out]">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 rounded-full bg-orange-100 dark:bg-orange-900/30">
-                <span className="material-symbols-outlined text-orange-500 text-2xl">warning</span>
-              </div>
-              <h3 className="text-lg font-bold">Jurnal Sudah Terisi</h3>
-            </div>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-              Kamu sudah mengisi jurnal untuk tanggal ini. Data sebelumnya akan <strong>ditimpa</strong> dengan data baru. Lanjutkan?
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowConfirmModal(false)}
-                className="flex-1 py-3 rounded-xl border border-gray-200 dark:border-gray-700 font-semibold text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-              >
-                Batal
-              </button>
-              <button
-                onClick={handleSubmit}
-                className="flex-1 py-3 rounded-xl bg-primary text-[#102216] font-bold text-sm hover:scale-[0.98] transition-transform"
-              >
-                Ya, Timpa
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Modal konfirmasi timpa dihapus - jurnal hanya bisa diisi 1x per hari */}
 
       {/* Action */}
       <div className="p-4 mt-4 space-y-4">
-        <button
-          onClick={handleSubmit}
-          disabled={isSubmitting}
-          className="w-full bg-primary text-[#102216] font-bold py-4 rounded-xl shadow-lg shadow-primary/20 hover:scale-[0.98] transition-transform flex items-center justify-center gap-2 disabled:opacity-70"
-        >
-          {isSubmitting ? 'Menyimpan...' : (
-            <>
-              {hasExistingEntry ? 'Perbarui' : 'Simpan'} Jurnal {isToday() ? 'Hari Ini' : 'Tanggal Ini'}
-              <span className="material-symbols-outlined font-variation-filled">{hasExistingEntry ? 'edit' : 'check_circle'}</span>
-            </>
-          )}
-        </button>
-        {isToday() && <p className="text-center text-xs opacity-40 font-medium">Kamu dapat mengedit jurnal ini hingga jam 12 malam.</p>}
+        {hasExistingEntry ? (
+          <button
+            disabled
+            className="w-full bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 font-bold py-4 rounded-xl flex items-center justify-center gap-2 cursor-not-allowed"
+          >
+            <span className="material-symbols-outlined text-green-600 dark:text-green-400">check_circle</span>
+            Jurnal Sudah Tersimpan
+          </button>
+        ) : (
+          <button
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            className="w-full bg-primary text-[#102216] font-bold py-4 rounded-xl shadow-lg shadow-primary/20 hover:scale-[0.98] transition-transform flex items-center justify-center gap-2 disabled:opacity-70"
+          >
+            {isSubmitting ? 'Menyimpan...' : (
+              <>
+                Simpan Jurnal {isToday() ? 'Hari Ini' : 'Tanggal Ini'}
+                <span className="material-symbols-outlined font-variation-filled">check_circle</span>
+              </>
+            )}
+          </button>
+        )}
+        {!hasExistingEntry && <p className="text-center text-xs opacity-40 font-medium">⚠️ Setelah disimpan, jurnal tidak bisa diubah lagi.</p>}
       </div>
     </div>
   );
