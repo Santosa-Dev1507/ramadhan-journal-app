@@ -305,7 +305,7 @@ export const getStudentHistory = async (nis: string): Promise<JournalEntry[]> =>
     return history;
   }
   try {
-    const response = await fetchWithRetry(`${GOOGLE_SCRIPT_URL}?action=getHistory&studentId=${nis}`);
+    const response = await fetchWithRetry(`${GOOGLE_SCRIPT_URL}?action=getHistory&nis=${nis}`);
     const result = await response.json();
     return result.status === 'success' ? result.data : [];
   } catch (error) {
